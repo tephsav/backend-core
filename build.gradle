@@ -10,6 +10,7 @@ version = '1.0-SNAPSHOT'
 ext {
     junitVersion = '5.11.0'
     assertjVersion = '4.0.0-M1'
+    lombokVersion = '1.18.40' // Sprint 1, BCORE-4
 }
 
 java {
@@ -27,6 +28,11 @@ repositories {
 }
 
 dependencies {
+    // Lombok (для демонстрации, не используется в Sprint 1)
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Testing
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
