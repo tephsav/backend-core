@@ -8,40 +8,37 @@ class ContactTest {
     @Test
     void shouldCreateContact_whenValidData() {
         // Given
-        String firstName = "John";
-        String lastName = "Doe";
+        Address address = new Address("Moscow", "Lenina", "123456");
         String email = "john@example.com";
+        String phone = "+79001234567";
 
         // When
-        Contact contact = new Contact(firstName, lastName, email);
+        Contact contact = new Contact(email, phone, address);
 
         // Then
-        assertThat(contact.firstName()).isEqualTo(firstName);
-        assertThat(contact.lastName()).isEqualTo(lastName);
-        assertThat(contact.email()).isEqualTo(email);
+        assertThat(contact.address()).isEqualTo(address);
+        assertThat(contact.address().city()).isEqualTo("Moscow");
     }
 
     @Test
-    void shouldBeEqual_whenSameData() {
+    void shouldDelegateToAddress_whenAccessingCity() {
         // Given
-        String firstName = "John";
-        String lastName = "Doe";
+        Address address = new Address("Moscow", "Lenina", "123456");
         String email = "john@example.com";
-        Contact contact1 = new Contact(firstName, lastName, email);
-        Contact contact2 = new Contact(firstName, lastName, email);
+        String phone = "+79001234567";
+
+        // When
+        Contact contact = new Contact(email, phone, address);
 
         // Then
-        assertThat(contact1).isEqualTo(contact2);
-        assertThat(contact1.hashCode()).isEqualTo(contact2.hashCode());
+        assertThat(contact.address().city()).isEqualTo("Moscow");
+        assertThat(contact.address().street()).isEqualTo("Lenina");
     }
 
     @Test
-    void shouldNotBeEqual_whenDifferentData() {
-        // Given
-        Contact contact1 = new Contact("John", "Doe", "john@example.com");
-        Contact contact2 = new Contact("Jane", "Liy", "jane@example.com");
-
-        // Then
-        assertThat(contact1).isNotEqualTo(contact2);
+    void shouldThrowException_whenAddressIsNull() {
+        assertThatThrownBy(() -> new Contact("john@example.com", "+79001234567", null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Address cannot be null");
     }
 }
