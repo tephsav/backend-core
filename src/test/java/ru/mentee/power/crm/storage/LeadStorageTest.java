@@ -1,6 +1,8 @@
 package ru.mentee.power.crm.storage;
 
 import org.junit.jupiter.api.Test;
+import ru.mentee.power.crm.domain.Address;
+import ru.mentee.power.crm.domain.Contact;
 import ru.mentee.power.crm.domain.Lead;
 
 import java.util.UUID;
@@ -13,7 +15,8 @@ class LeadStorageTest {
     void shouldAddLead_whenLeadIsUnique() {
         // Given
         LeadStorage storage = new LeadStorage();
-        Lead uniqueLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        UUID id = UUID.randomUUID();
+        Lead uniqueLead = new Lead(id, new Contact("ivan@mail.ru", "+7123", new Address("Moscow", "Lenina", "123456")), "TechCorp", "NEW");
 
         // When
         boolean added = storage.add(uniqueLead);
@@ -28,8 +31,9 @@ class LeadStorageTest {
     void shouldRejectDuplicate_whenEmailAlreadyExists() {
         // Given
         LeadStorage storage = new LeadStorage();
-        Lead existingLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-        Lead duplicateLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7456", "Other", "NEW");
+        UUID existingId = UUID.randomUUID();
+        Lead existingLead = new Lead(existingId, new Contact("ivan@mail.ru", "+7123", new Address("Moscow", "Lenina", "123456")), "TechCorp", "NEW");
+        Lead duplicateLead = new Lead(UUID.randomUUID(), new Contact("ivan@mail.ru", "+7456", new Address("SPb", "Nevsky", "654321")), "Other", "NEW");
         storage.add(existingLead);
 
         // When
@@ -46,11 +50,12 @@ class LeadStorageTest {
         // Given
         LeadStorage storage = new LeadStorage();
         for (int i = 0; i < 100; i++) {
-            storage.add(new Lead(UUID.randomUUID(), "lead" + i + "@mail.ru", "+7000", "Company", "NEW"));
+            Lead lead = new Lead(UUID.randomUUID(), new Contact("lead" + i + "@mail.ru", "+7000", new Address("Moscow", "Lenina", "123456")), "Company", "NEW");
+            storage.add(lead);
         }
 
         // When
-        Lead hundredFirstLead = new Lead(UUID.randomUUID(), "lead101@mail.ru", "+7001", "Company", "NEW");
+        Lead hundredFirstLead = new Lead(UUID.randomUUID(), new Contact("lead101@mail.ru", "+7001", new Address("SPb", "Nevsky", "654321")), "Company", "NEW");
 
         // Then
         assertThatThrownBy(() -> storage.add(hundredFirstLead))
@@ -62,8 +67,9 @@ class LeadStorageTest {
     void shouldReturnOnlyAddedLeads_whenFindAllCalled() {
         // Given
         LeadStorage storage = new LeadStorage();
-        Lead firstLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-        Lead secondLead = new Lead(UUID.randomUUID(), "maria@startup.io", "+7456", "StartupLab", "NEW");
+        UUID firstId = UUID.randomUUID();
+        Lead firstLead = new Lead(firstId, new Contact("ivan@mail.ru", "+7123", new Address("Moscow", "Lenina", "123456")), "TechCorp", "NEW");
+        Lead secondLead = new Lead(UUID.randomUUID(), new Contact("maria@startup.io", "+7456", new Address("SPb", "Nevsky", "654321")), "StartupLab", "NEW");
         storage.add(firstLead);
         storage.add(secondLead);
 
