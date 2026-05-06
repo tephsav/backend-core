@@ -5,16 +5,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class LeadRepository {
     private final Map<String, Lead> storage = new HashMap<>();
+    private final Map<String, String> emailIndex = new HashMap<>();
 
-    public void save(Lead lead) {
+    public Lead save(Lead lead) {
         storage.put(lead.id(), lead);
+        emailIndex.put(lead.email(), lead.id());
+        return lead;
     }
 
-    public Lead findById(String id) {
-        return storage.get(id);
+    public Optional<Lead> findById(String id) {
+        return Optional.ofNullable(storage.get(id));
+    }
+
+    public Optional<Lead> findByEmail(String email) {
+        String id = emailIndex.get(email);
+        if (id == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(storage.get(id));
     }
 
     public List<Lead> findAll() {
@@ -22,7 +34,10 @@ public class LeadRepository {
     }
 
     public void delete(String id) {
-        storage.remove(id);
+        Lead lead = storage.remove(id);
+        if (lead != null) {
+            emailIndex.remove(lead.email());
+        }
     }
 
     public int size() {

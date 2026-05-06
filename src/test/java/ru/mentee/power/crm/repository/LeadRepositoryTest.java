@@ -6,6 +6,7 @@ import ru.mentee.power.crm.model.Lead;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,17 +27,17 @@ class LeadRepositoryTest {
         repository.save(lead);
 
         // Then
-        Lead foundLead = repository.findById("lead-1");
+        Optional<Lead> foundLead = repository.findById("lead-1");
         assertThat(foundLead).isNotNull();
     }
 
     @Test
     void shouldReturnNull_whenLeadNotFound() {
         // When
-        Lead foundLead = repository.findById("lead-1");
+        Optional<Lead> foundLead = repository.findById("lead-1");
 
         // Then
-        assertThat(foundLead).isNull();
+        assertThat(foundLead).isEmpty();
     }
 
     @Test
@@ -65,8 +66,8 @@ class LeadRepositoryTest {
         repository.delete(id);
 
         // Then
-        assertThat(repository.findById(id)).isNull();
-        assertThat(repository.size()).isEqualTo(0);
+        assertThat(repository.findById(id)).isEmpty();
+        assertThat(repository.size()).isZero();
     }
 
     @Test
@@ -80,7 +81,7 @@ class LeadRepositoryTest {
         repository.save(lead2);
 
         // Then
-        assertThat(lead2).isEqualTo(repository.findById("lead-1"));
+        assertThat(lead2).isEqualTo(repository.findById("lead-1").orElse(null));
         assertThat(repository.size()).isEqualTo(1);
     }
 
@@ -98,15 +99,14 @@ class LeadRepositoryTest {
 
         // When: Поиск через Map
         long mapStart = System.nanoTime();
-        Lead foundInMap = repository.findById(targetId);
+        Optional<Lead> foundInMap = repository.findById(targetId);
         long mapDuration = System.nanoTime() - mapStart;
 
         // When: Поиск через List.stream().filter()
         long listStart = System.nanoTime();
-        Lead foundInList = leadList.stream()
+        Optional<Lead> foundInList = leadList.stream()
                 .filter(lead -> lead.id().equals(targetId))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
         long listDuration = System.nanoTime() - listStart;
 
         // Then: Map должен быть минимум в 10 раз быстрее
