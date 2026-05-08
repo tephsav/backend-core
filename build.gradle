@@ -10,7 +10,8 @@ version = '1.0-SNAPSHOT'
 ext {
     junitVersion = '5.11.0'
     assertjVersion = '4.0.0-M1'
-    lombokVersion = '1.18.40' // Sprint 1, BCORE-4
+    lombokVersion = '1.18.40'
+    mockitoVersion = '5.14.2'
 }
 
 java {
@@ -27,8 +28,12 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    mockitoAgent
+}
+
 dependencies {
-    // Lombok (для демонстрации, не используется в Sprint 1)
+    // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
@@ -37,6 +42,13 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Mockito
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+
+    // Agent
+    mockitoAgent "net.bytebuddy:byte-buddy-agent:1.15.4"
 }
 
 jacoco {
@@ -45,6 +57,7 @@ jacoco {
 
 test {
     useJUnitPlatform()
+    jvmArgs += ["-javaagent:${configurations.mockitoAgent.singleFile}"]
     finalizedBy jacocoTestReport
 }
 
