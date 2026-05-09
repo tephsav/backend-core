@@ -21,8 +21,7 @@ public class LeadService {
             throw new IllegalStateException("Lead with email already exists: " + email);
         }
 
-        String id = UUID.randomUUID().toString();
-        Lead lead = new Lead(id, email, phone, company, status);
+        Lead lead = new Lead(UUID.randomUUID(), email, phone, company, status);
         return repository.save(lead);
     }
 
@@ -30,7 +29,7 @@ public class LeadService {
         return repository.findAll();
     }
 
-    public Optional<Lead> findById(String id) {
+    public Optional<Lead> findById(UUID id) {
         return repository.findById(id);
     }
 

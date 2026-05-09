@@ -33,21 +33,16 @@ configurations {
 }
 
 dependencies {
-    // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    // Testing
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // Mockito
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
-
-    // Agent
     mockitoAgent "net.bytebuddy:byte-buddy-agent:1.15.4"
 }
 
@@ -63,6 +58,13 @@ test {
 
 jacocoTestReport {
     dependsOn test
+    classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        '**/Main.class'
+                ])
+            })
+    )
     reports {
         xml.required = false
         csv.required = false
@@ -73,12 +75,18 @@ jacocoTestReport {
 
 jacocoTestCoverageVerification {
     dependsOn jacocoTestReport
+    classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        '**/Main.class'
+                ])
+            })
+    )
     violationRules {
         rule {
             limit {
                 minimum = 0.80
             }
-            excludes = ['**/*Main.class']
         }
     }
 }

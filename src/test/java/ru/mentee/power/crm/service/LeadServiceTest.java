@@ -22,16 +22,13 @@ class LeadServiceTest {
 
     @Test
     void shouldCreateLead_whenEmailIsUnique() {
-        // Given
         String email = "test@example.com";
         String phone = "+123456";
         String company = "Test Company";
         String status = "NEW";
 
-        // When
         Lead result = service.addLead(email, phone, company, status);
 
-        // Then
         assertThat(result).isNotNull();
         assertThat(result.email()).isEqualTo(email);
         assertThat(result.phone()).isEqualTo(phone);
@@ -42,11 +39,9 @@ class LeadServiceTest {
 
     @Test
     void shouldThrowException_whenEmailAlreadyExists() {
-        // Given
         String email = "duplicate@example.com";
         service.addLead(email, "+123456", "First Company", "NEW");
 
-        // Then
         assertThatThrownBy(() ->
                 service.addLead(email, "+654321", "Second Company", "NEW")
         )
@@ -56,49 +51,38 @@ class LeadServiceTest {
 
     @Test
     void shouldFindAllLeads() {
-        // Given
         service.addLead("one@example.com", "+123456", "Company 1", "NEW");
         service.addLead("two@example.com", "+213456", "Company 2", "CONTACTED");
 
-        // When
         List<Lead> result = service.findAll();
 
-        // Then
         assertThat(result).hasSize(2);
     }
 
     @Test
     void shouldFindLeadById() {
-        // Given
         Lead created = service.addLead("find@example.com", "+123456", "Company", "NEW");
 
-        // When
         Optional<Lead> result = service.findById(created.id());
 
-        // Then
         assertThat(result).isPresent();
         assertThat(result.get().email()).isEqualTo("find@example.com");
     }
 
     @Test
     void shouldFindLeadByEmail() {
-        // Given
         service.addLead("search@example.com", "+123456", "Company", "NEW");
 
-        // When
         Optional<Lead> result = service.findByEmail("search@example.com");
 
-        // Then
         assertThat(result).isPresent();
         assertThat(result.get().company()).isEqualTo("Company");
     }
 
     @Test
     void shouldReturnEmpty_whenLeadNotFound() {
-        // When
         Optional<Lead> result = service.findByEmail("nonexistent@example.com");
 
-        // Then
         assertThat(result).isEmpty();
     }
 }
