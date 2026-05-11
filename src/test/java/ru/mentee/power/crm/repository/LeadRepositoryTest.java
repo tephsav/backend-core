@@ -7,6 +7,7 @@ import ru.mentee.power.crm.model.Lead;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -20,119 +21,90 @@ class LeadRepositoryTest {
 
     @Test
     void shouldSaveAndFindLeadById_whenLeadSaved() {
-        // Given
-        Lead lead = new Lead("lead-1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        UUID id = UUID.randomUUID();
+        Lead lead = new Lead(id, "ivan@mail.ru", "+7123", "TechCorp", "NEW");
 
-        // When
         repository.save(lead);
 
-        // Then
-        Optional<Lead> foundLead = repository.findById("lead-1");
+        Optional<Lead> foundLead = repository.findById(id);
         assertThat(foundLead).isNotNull();
     }
 
     @Test
     void shouldReturnNull_whenLeadNotFound() {
-        // When
-        Optional<Lead> foundLead = repository.findById("lead-1");
+        Optional<Lead> foundLead = repository.findById(UUID.randomUUID());
 
-        // Then
         assertThat(foundLead).isEmpty();
     }
 
     @Test
     void shouldReturnAllLeads_whenMultipleLeadsSaved() {
-        // Given
         for (int i = 0; i < 3; i++) {
-            Lead lead = new Lead("lead-" + i, "ivan" + i + "@mail.ru", "+7123" + i, "TechCorp", "NEW");
+            Lead lead = new Lead(UUID.randomUUID(), "ivan" + i + "@mail.ru", "+7123" + i, "TechCorp", "NEW");
             repository.save(lead);
         }
 
-        // When
         List<Lead> leads = repository.findAll();
 
-        // Then
         assertThat(leads).hasSize(3);
     }
 
     @Test
     void shouldDeleteLead_whenLeadExists() {
-        // Given
-        String id = "lead-1";
+        UUID id = UUID.randomUUID();
         Lead lead = new Lead(id, "ivan@mail.ru", "+7123", "TechCorp", "NEW");
         repository.save(lead);
 
-        // When
         repository.delete(id);
 
-        // Then
         assertThat(repository.findById(id)).isEmpty();
         assertThat(repository.size()).isZero();
     }
 
     @Test
     void shouldOverwriteLead_whenSaveWithSameId() {
-        // Given
-        Lead lead1 = new Lead("lead-1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        UUID sharedId = UUID.randomUUID();
+        Lead lead1 = new Lead(sharedId, "ivan@mail.ru", "+7123", "TechCorp", "NEW");
         repository.save(lead1);
 
-        // When
-        Lead lead2 = new Lead("lead-1", "petya@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead lead2 = new Lead(sharedId, "petya@mail.ru", "+7123", "TechCorp", "NEW");
         repository.save(lead2);
 
-        // Then
-        assertThat(lead2).isEqualTo(repository.findById("lead-1").orElse(null));
+        assertThat(lead2).isEqualTo(repository.findById(sharedId).orElse(null));
         assertThat(repository.size()).isEqualTo(1);
     }
 
     @Test
     void shouldFindFasterWithMap_thanWithListFilter() {
-        // Given: Создать 1000 лидов
         List<Lead> leadList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            Lead lead = new Lead("lead-" + i, "email" + i + "@test.com", "+7" + i, "Company" + i, "NEW");
+            UUID id = UUID.randomUUID();
+            Lead lead = new Lead(id, "email" + i + "@test.com", "+7" + i, "Company" + i, "NEW");
             repository.save(lead);
             leadList.add(lead);
         }
+        UUID targetId = leadList.get(500).id();
 
-        String targetId = "lead-500";  // Средний элемент
-
-        // When: Поиск через Map
         long mapStart = System.nanoTime();
         Optional<Lead> foundInMap = repository.findById(targetId);
         long mapDuration = System.nanoTime() - mapStart;
-
-        // When: Поиск через List.stream().filter()
         long listStart = System.nanoTime();
         Optional<Lead> foundInList = leadList.stream()
                 .filter(lead -> lead.id().equals(targetId))
                 .findFirst();
         long listDuration = System.nanoTime() - listStart;
 
-        // Then: Map должен быть минимум в 10 раз быстрее
         assertThat(foundInMap).isEqualTo(foundInList);
         assertThat(listDuration).isGreaterThan(mapDuration * 10);
-
-        System.out.println("Map поиск: " + mapDuration + " ns");
-        System.out.println("List поиск: " + listDuration + " ns");
-        System.out.println("Ускорение: " + (listDuration / mapDuration) + "x");
     }
 
     @Test
     void shouldSaveBothLeads_evenWithSameEmailAndPhone_becauseRepositoryDoesNotCheckBusinessRules() {
-        // Given: два lead с разными id, но одинаковыми контактами
-        Lead originalLead = new Lead("lead-1", "ivan@mail.ru", "+79001234567", "Acme Corp", "NEW");
-        Lead duplicateLead = new Lead("lead-2", "ivan@mail.ru", "+79001234567", "TechCorp", "HOT");
-
-        // When: сохраняем оба
+        Lead originalLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+79001234567", "Acme Corp", "NEW");
+        Lead duplicateLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+79001234567", "TechCorp", "HOT");
         repository.save(originalLead);
         repository.save(duplicateLead);
 
-        // Then: Repository сохранил оба (это технически правильно!)
         assertThat(repository.size()).isEqualTo(2);
-
-        // But: Бизнес недоволен — в CRM два контакта на одного человека
-        // Решение: Service Layer в Sprint 5 будет проверять бизнес-правила
-        // перед вызовом repository.save()
     }
 }

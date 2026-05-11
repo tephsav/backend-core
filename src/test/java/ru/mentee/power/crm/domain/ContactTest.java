@@ -7,30 +7,24 @@ class ContactTest {
 
     @Test
     void shouldCreateContact_whenValidData() {
-        // Given
         Address address = new Address("Moscow", "Lenina", "123456");
         String email = "john@example.com";
         String phone = "+79001234567";
 
-        // When
         Contact contact = new Contact(email, phone, address);
 
-        // Then
         assertThat(contact.address()).isEqualTo(address);
         assertThat(contact.address().city()).isEqualTo("Moscow");
     }
 
     @Test
     void shouldDelegateToAddress_whenAccessingCity() {
-        // Given
         Address address = new Address("Moscow", "Lenina", "123456");
         String email = "john@example.com";
         String phone = "+79001234567";
 
-        // When
         Contact contact = new Contact(email, phone, address);
 
-        // Then
         assertThat(contact.address().city()).isEqualTo("Moscow");
         assertThat(contact.address().street()).isEqualTo("Lenina");
     }
