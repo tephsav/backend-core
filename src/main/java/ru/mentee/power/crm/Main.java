@@ -16,6 +16,7 @@ public class Main {
         for(int i = 0; i < 5; i++) {
             leadService.addLead("lead" + i + "@test.com", "+12345" + i, "Company" + i, "NEW");
         }
+        leadService.addLead("<script>alert('XSS')</script>", "+000000", "SomeCompany", "NEW");
 
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(8080);
