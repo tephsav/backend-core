@@ -19,6 +19,7 @@ ext {
     tomcatVersion = '11.0.1'
     jteVersion = '3.1.15'
     springBootVersion = '3.5.7'
+    jteSpringBootVersion = '3.1.15'
 }
 
 java {
@@ -57,8 +58,10 @@ dependencies {
 
     implementation "gg.jte:jte:${jteVersion}"
     implementation "gg.jte:jte-runtime:${jteVersion}"
+    implementation "gg.jte:jte-spring-boot-starter-3:${jteSpringBootVersion}"
 
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 bootRun {
@@ -86,7 +89,8 @@ jacocoTestReport {
     classDirectories.setFrom(
             files(classDirectories.files.collect {
                 fileTree(dir: it, exclude: [
-                        '**/Main.class'
+                        '**/Main.class',
+                        '**/Application.class'
                 ])
             })
     )
@@ -103,7 +107,8 @@ jacocoTestCoverageVerification {
     classDirectories.setFrom(
             files(classDirectories.files.collect {
                 fileTree(dir: it, exclude: [
-                        '**/Main.class'
+                        '**/Main.class',
+                        '**/Application.class'
                 ])
             })
     )
