@@ -2,6 +2,8 @@ package ru.mentee.power.crm.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.repository.LeadRepository;
 
@@ -84,5 +86,65 @@ class LeadServiceTest {
         Optional<Lead> result = service.findByEmail("nonexistent@example.com");
 
         assertThat(result).isEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"NEW,3", "CONTACTED,5", "QUALIFIED,2"})
+    void shouldReturnOnlyLeads_whenFindByStatus(String status, int count) {
+        service.addLead("one@example.com", "+1234560", "Company 1", "NEW");
+        service.addLead("two@example.com", "+1234561", "Company 2", "NEW");
+        service.addLead("three@example.com", "+1234562", "Company 3", "NEW");
+        service.addLead("four@example.com", "+1234563", "Company 4", "CONTACTED");
+        service.addLead("five@example.com", "+1234564", "Company 5", "CONTACTED");
+        service.addLead("six@example.com", "+1234565", "Company 6", "CONTACTED");
+        service.addLead("seven@example.com", "+1234566", "Company 7", "CONTACTED");
+        service.addLead("eight@example.com", "+1234567", "Company 8", "CONTACTED");
+        service.addLead("nine@example.com", "+1234568", "Company 9", "QUALIFIED");
+        service.addLead("ten@example.com", "+1234569", "Company 10", "QUALIFIED");
+
+        List<Lead> result = service.findByStatus(status);
+
+        assertThat(result).hasSize(count);
+        assertThat(result).allMatch(lead -> lead.status().equals(status));
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenNoLeadsWithStatusNew() {
+        service.addLead("one@example.com", "+1234560", "Company 1", "QUALIFIED");
+        service.addLead("two@example.com", "+1234561", "Company 2", "QUALIFIED");
+        service.addLead("three@example.com", "+1234562", "Company 3", "CONTACTED");
+        service.addLead("four@example.com", "+1234563", "Company 4", "CONTACTED");
+        service.addLead("five@example.com", "+1234564", "Company 5", "CONTACTED");
+        service.addLead("six@example.com", "+1234565", "Company 6", "QUALIFIED");
+
+        List<Lead> result = service.findByStatus("NEW");
+
+        assertThat(result).hasSize(0);
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenNoLeadsWithStatusContacted() {
+        service.addLead("one@example.com", "+1234560", "Company 1", "NEW");
+        service.addLead("two@example.com", "+1234561", "Company 2", "NEW");
+        service.addLead("three@example.com", "+1234562", "Company 3", "QUALIFIED");
+        service.addLead("four@example.com", "+1234563", "Company 4", "QUALIFIED");
+        service.addLead("five@example.com", "+1234564", "Company 5", "QUALIFIED");
+
+        List<Lead> result = service.findByStatus("CONTACTED");
+
+        assertThat(result).hasSize(0);
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenNoLeadsWithStatusQualified() {
+        service.addLead("one@example.com", "+1234560", "Company 1", "NEW");
+        service.addLead("two@example.com", "+1234561", "Company 2", "NEW");
+        service.addLead("three@example.com", "+1234562", "Company 3", "CONTACTED");
+        service.addLead("five@example.com", "+1234564", "Company 5", "CONTACTED");
+        service.addLead("six@example.com", "+1234565", "Company 6", "NEW");
+
+        List<Lead> result = service.findByStatus("QUALIFIED");
+
+        assertThat(result).hasSize(0);
     }
 }

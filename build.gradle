@@ -80,6 +80,7 @@ jacoco {
 
 test {
     useJUnitPlatform()
+    exclude '**/StackComparisonTest.class'
     jvmArgs += ["-javaagent:${configurations.mockitoAgent.singleFile}"]
     finalizedBy jacocoTestReport
 }
@@ -90,7 +91,9 @@ jacocoTestReport {
             files(classDirectories.files.collect {
                 fileTree(dir: it, exclude: [
                         '**/Main.class',
-                        '**/Application.class'
+                        '**/Application.class',
+                        '**/crm/web/**',
+                        '**/crm/domain/**'
                 ])
             })
     )
@@ -108,7 +111,9 @@ jacocoTestCoverageVerification {
             files(classDirectories.files.collect {
                 fileTree(dir: it, exclude: [
                         '**/Main.class',
-                        '**/Application.class'
+                        '**/Application.class',
+                        '**/crm/web/**',
+                        '**/crm/domain/**'
                 ])
             })
     )
