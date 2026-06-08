@@ -5,22 +5,31 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-bold mb-4">Lead List</h2>
 
-        <div class="mb-4 flex gap-2">
-            <a href="/leads"
-               class="px-4 py-2 rounded ${currentFilter == null ? "bg-blue-500 text-white" : "bg-gray-200"}">
-                Все
-            </a>
-            <a href="/leads?status=NEW"
-               class="px-4 py-2 rounded ${currentFilter == "NEW" ? "bg-blue-500 text-white" : "bg-gray-200"}">
-                NEW
-            </a>
-            <a href="/leads?status=CONTACTED"
-               class="px-4 py-2 rounded ${currentFilter == "CONTACTED" ? "bg-blue-500 text-white" : "bg-gray-200"}">
-                CONTACTED
-            </a>
-            <a href="/leads?status=QUALIFIED"
-               class="px-4 py-2 rounded ${currentFilter == "QUALIFIED" ? "bg-blue-500 text-white" : "bg-gray-200"}">
-                QUALIFIED
+        <div class="mb-4 flex justify-between items-center">
+            <div class="mb-4 flex gap-2">
+                <a href="/leads"
+                   class="px-4 py-2 rounded ${currentFilter == null ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                    Все
+                </a>
+                <a href="/leads?status=NEW"
+                   class="px-4 py-2 rounded ${currentFilter == "NEW" ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                    NEW
+                </a>
+                <a href="/leads?status=CONTACTED"
+                   class="px-4 py-2 rounded ${currentFilter == "CONTACTED" ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                    CONTACTED
+                </a>
+                <a href="/leads?status=QUALIFIED"
+                   class="px-4 py-2 rounded ${currentFilter == "QUALIFIED" ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                    QUALIFIED
+                </a>
+            </div>
+
+            <a
+                href="/leads/new"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+                + Добавить лида
             </a>
         </div>
 
