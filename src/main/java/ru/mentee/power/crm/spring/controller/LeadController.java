@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
@@ -15,8 +16,13 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class LeadController {
-
     private final LeadService leadService;
+
+    @GetMapping("/")
+    @ResponseBody
+    public String home() {
+        return "Spring Boot CRM is running! Beans created: " + leadService.findAll().size() + " leads.";
+    }
 
     @GetMapping("leads/new")
     public String showCreateForm(Model model) {
