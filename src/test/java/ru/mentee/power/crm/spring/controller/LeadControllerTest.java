@@ -10,13 +10,19 @@ import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,5 +51,41 @@ class LeadControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Показаны лиды со статусом: NEW")))
                 .andExpect(content().string(containsString("one@example.com")));
+    }
+
+    @Test
+    void shouldShowEditForm() throws Exception {
+        UUID id = UUID.randomUUID();
+        Lead lead = new Lead(id, "testLead@test.com", "+123789456","Test Company", "NEW");
+        when(leadService.findById(id)).thenReturn(Optional.of(lead));
+
+        mockMvc.perform(get("/leads/" + id + "/edit"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("lead", lead))
+                .andExpect(view().name("leads/edit"));
+    }
+
+    @Test
+    void shouldUpdateLead() throws Exception {
+        UUID id = UUID.randomUUID();
+        Lead updatedLead = new Lead(id, "newLead@test.com", "+111999666", "Microsoft", "CONTACTED");
+
+        when(leadService.update(id, updatedLead)).thenReturn(updatedLead);
+
+        mockMvc.perform(post("/leads/" + id)
+                .param("email", updatedLead.email())
+                .param("phone", updatedLead.phone())
+                .param("company", updatedLead.company())
+                .param("status", updatedLead.status()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/leads"));
+
+        verify(leadService).update(id, updatedLead);
+    }
+
+    @Test
+    void shouldReturn404ForNonexistentId() throws Exception {
+        mockMvc.perform(get("/leads/" + UUID.randomUUID() + "/edit"))
+                .andExpect(status().isNotFound());
     }
 }

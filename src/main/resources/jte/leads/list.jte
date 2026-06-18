@@ -44,6 +44,7 @@
                     <th class="px-4 py-2 text-left">Phone</th>
                     <th class="px-4 py-2 text-left">Company</th>
                     <th class="px-4 py-2 text-left">Status</th>
+                    <th class="px-4 py-2 text-left"></th>
                 </tr>
             </thead>
             <tbody>
@@ -56,6 +57,14 @@
                             <span class="px-2 py-1 rounded text-sm bg-green-100 text-green-800">
                                 ${lead.status()}
                             </span>
+                        </td>
+                        <td>
+                            <a
+                                    href = "/leads/${String.valueOf(lead.id())}/edit"
+                                    class="text-blue-600 hover:underline"
+                            >
+                                Редактировать
+                            </a>
                         </td>
                     </tr>
                 @endfor
