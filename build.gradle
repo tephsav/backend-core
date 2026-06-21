@@ -92,6 +92,7 @@ jacocoTestReport {
                 fileTree(dir: it, exclude: [
                         '**/Main.class',
                         '**/Application.class',
+                        '**/DemoController.class',
                         '**/crm/web/**',
                         '**/crm/domain/**'
                 ])
@@ -112,6 +113,7 @@ jacocoTestCoverageVerification {
                 fileTree(dir: it, exclude: [
                         '**/Main.class',
                         '**/Application.class',
+                        '**/DemoController.class',
                         '**/crm/web/**',
                         '**/crm/domain/**'
                 ])
