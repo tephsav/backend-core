@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
@@ -14,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,6 +57,24 @@ class LeadControllerTest {
     }
 
     @Test
+    void shouldReturnAddForm_whenGetLeadsNew() throws Exception {
+        mockMvc.perform(get("/leads/new"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("leads/create"));
+    }
+
+    @Test
+    void shouldRedirect_whenLeadAdded() throws Exception {
+        mockMvc.perform(post("/leads")
+                .param("email", "user1@test.com")
+                .param("phone", "+123456789")
+                .param("company", "Test Company name")
+                .param("status", "NEW"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/leads"));
+    }
+
+    @Test
     void shouldShowEditForm() throws Exception {
         UUID id = UUID.randomUUID();
         Lead lead = new Lead(id, "testLead@test.com", "+123789456","Test Company", "NEW");
@@ -87,5 +108,32 @@ class LeadControllerTest {
     void shouldReturn404ForNonexistentId() throws Exception {
         mockMvc.perform(get("/leads/" + UUID.randomUUID() + "/edit"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldDeleteLeadAndRedirect() throws Exception {
+        UUID id = UUID.randomUUID();
+        Lead deletedLead = new Lead(id, "deleteLead@test.com", "+123456789", "Test Company", "CONTACTED");
+
+        when(leadService.findById(id)).thenReturn(Optional.of(deletedLead));
+
+        mockMvc.perform(post("/leads/{id}/delete", id))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/leads"));
+
+        verify(leadService).delete(id);
+    }
+
+    @Test
+    void shouldReturn404ForNonexistentLead() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"))
+                .when(leadService).delete(id);
+
+        mockMvc.perform(post("/leads/{id}/delete", id))
+                .andExpect(status().isNotFound());
+
+        verify(leadService).delete(id);
     }
 }

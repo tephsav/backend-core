@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.repository.LeadRepository;
 
@@ -71,5 +72,50 @@ class LeadServiceMockTest {
         var inOrder = inOrder(mockRepository);
         inOrder.verify(mockRepository).findByEmail("test@example.com");
         inOrder.verify(mockRepository).save(any(Lead.class));
+    }
+
+    @Test
+    void shouldCallUpdate_whenLeadExists() {
+        UUID id = UUID.randomUUID();
+        Lead existingLead = new Lead(id, "old@mail.com", "+123789", "OldComp", "NEW");
+        Lead updatedLead = new Lead(id, "new@mail.com", "+987321", "NewComp", "CONTACTED");
+
+        when(mockRepository.findById(id)).thenReturn(Optional.of(existingLead));
+        when(mockRepository.save(any(Lead.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.update(id, updatedLead);
+
+        verify(mockRepository).save(updatedLead);
+    }
+
+    @Test
+    void shouldThrowException_whenUpdateLeadNotExists() {
+        UUID id = UUID.randomUUID();
+        when(mockRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.update(id, new Lead(id, "email", "phone", "comp", "NEW")))
+                .isInstanceOf(ResponseStatusException.class);
+    }
+
+    @Test
+    void shouldCallDelete_whenLeadExists() {
+        UUID id = UUID.randomUUID();
+        Lead lead = new Lead(id, "lead@mail.com", "+123789", "TestComp", "NEW");
+
+        when(mockRepository.findById(id)).thenReturn(Optional.of(lead));
+
+        service.delete(id);
+
+        verify(mockRepository).delete(id);
+    }
+
+    @Test
+    void shouldThrowException_whenDeleteLeadNotExists() {
+        UUID id = UUID.randomUUID();
+        when(mockRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.delete(id))
+                .isInstanceOf(ResponseStatusException.class);
     }
 }
