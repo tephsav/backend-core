@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class LeadService {
@@ -57,8 +58,22 @@ public class LeadService {
         return repository.findByEmail(email);
     }
 
+    public List<Lead> findLeads(String email, String status) {
+        Stream<Lead> stream = repository.findAll().stream();
+
+        if (email != null && !email.isEmpty()) {
+            stream = stream.filter(lead -> lead.email().toLowerCase().contains(email.toLowerCase()));
+        }
+
+        if (status != null && !status.isEmpty()) {
+            stream = stream.filter(lead -> lead.status().equals(status));
+        }
+
+        return stream.collect(Collectors.toList());
+    }
+
     public Lead update(UUID id, Lead updatedLead) {
-        Lead foundLead = repository.findById(id)
+        repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
         Lead savingLead = new Lead(
                 id,
@@ -72,7 +87,7 @@ public class LeadService {
     }
 
     public void delete(UUID id) {
-        Lead foundLead = repository.findById(id)
+        repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         repository.delete(id);
     }

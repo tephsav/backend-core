@@ -42,14 +42,14 @@ public class LeadController {
 
     @GetMapping("/leads")
     public String showLeads(
+            @RequestParam(required = false) String email,
             @RequestParam(required = false) String status,
             Model model
     ) {
-        List<Lead> leads = (status == null)
-                ? leadService.findAll()
-                : leadService.findByStatus(status);
+        List<Lead> leads = leadService.findLeads(email, status);
         model.addAttribute("leads", leads);
-        model.addAttribute("currentFilter", status);
+        model.addAttribute("email", email != null ? email : "");
+        model.addAttribute("status", status != null ? status : "");
         return "leads/list";
     }
 
