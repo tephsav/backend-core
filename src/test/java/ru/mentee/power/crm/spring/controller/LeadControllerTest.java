@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.service.LeadService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,13 +47,12 @@ class LeadControllerTest {
 
     @Test
     void shouldReturnFilteredLeads_whenStatusParam() throws Exception {
-        when(leadService.findByStatus("NEW")).thenReturn(List.of(
+        when(leadService.findLeads(null, "NEW")).thenReturn(List.of(
                 new Lead(UUID.randomUUID(), "one@example.com", "+1234560", "Company 1", "NEW")
         ));
 
         mockMvc.perform(get("/leads").param("status", "NEW"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Показаны лиды со статусом: NEW")))
                 .andExpect(content().string(containsString("one@example.com")));
     }
 
@@ -135,5 +135,65 @@ class LeadControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(leadService).delete(id);
+    }
+
+    @Test
+    void shouldReturnLeads_whenParamEmail() throws Exception {
+        Lead lead = new Lead(UUID.randomUUID(), "leadName@mail.com", "+123456789", "CompanyName", "NEW");
+        List<Lead> leads = new ArrayList<>();
+        leads.add(lead);
+
+        when(leadService.findLeads("lead", null)).thenReturn(leads);
+
+        mockMvc.perform(get("/leads")
+                .param("email", "lead"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("leads", leads))
+                .andExpect(model().attribute("email", "lead"));
+    }
+
+    @Test
+    void shouldReturnLeads_whenParamStatus() throws Exception {
+        Lead lead = new Lead(UUID.randomUUID(), "leadName@mail.com", "+123456789", "CompanyName", "NEW");
+        List<Lead> leads = new ArrayList<>();
+        leads.add(lead);
+
+        when(leadService.findLeads(null, "NEW")).thenReturn(leads);
+
+        mockMvc.perform(get("/leads")
+                .param("status", "NEW"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("leads", leads))
+                .andExpect(model().attribute("status", "NEW"));
+    }
+
+    @Test
+    void shouldReturnAllLeads_whenNoParams() throws Exception {
+        Lead lead = new Lead(UUID.randomUUID(), "leadName@mail.com", "+123456789", "CompanyName", "NEW");
+        List<Lead> leads = new ArrayList<>();
+        leads.add(lead);
+
+        when(leadService.findLeads(null, null)).thenReturn(leads);
+
+        mockMvc.perform(get("/leads"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("leads", leads));
+    }
+
+    @Test
+    void shouldReturnLeads_whenParamsEmailAndStatus() throws Exception {
+        Lead lead = new Lead(UUID.randomUUID(), "leadName@mail.com", "+123456789", "CompanyName", "NEW");
+        List<Lead> leads = new ArrayList<>();
+        leads.add(lead);
+
+        when(leadService.findLeads("lead", "NEW")).thenReturn(leads);
+
+        mockMvc.perform(get("/leads")
+                        .param("email", "lead")
+                        .param("status", "NEW"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("leads", leads))
+                .andExpect(model().attribute("email", "lead"))
+                .andExpect(model().attribute("status", "NEW"));
     }
 }
